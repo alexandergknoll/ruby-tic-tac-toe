@@ -2,7 +2,7 @@
 
 ##Summary
 
-A visual tic-tac-toe game that works in the terminal.
+A visual tic-tac-toe game, coded in Ruby, that works in the terminal.
 
 ##Project Map
 
