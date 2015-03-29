@@ -1,3 +1,5 @@
+require_relative "term_color"
+
 class Square
   attr_reader :value
 
@@ -20,15 +22,15 @@ class Board
   end
 
   def make_move(player, square_num)
-    y = index_transform_y(square_num)
-    x = index_transform_x(square_num)
+    y = BoardMath.transform_y_index(square_num)
+    x = BoardMath.transform_x_index(square_num)
     squares[y][x].make_move(player)
   end
 
   def valid_move?(square_num)
-    y = index_transform_y(square_num)
-    x = index_transform_x(square_num)
-    if square_num.between?(1, 9) && !squares[y][x].value
+    y = BoardMath.transform_y_index(square_num)
+    x = BoardMath.transform_x_index(square_num)
+    if square_num.between?(1, 9) && squares[y][x].value == nil
       true
     else
       false
@@ -41,10 +43,6 @@ class Board
     else
       return false
     end
-  end
-
-  def square_num(y, x)
-    3 * y + x + 1
   end
 
   private
@@ -107,18 +105,26 @@ class Board
     return false
   end
 
-  def index_transform(square_num)
-    square_num-1
+end
+
+class BoardMath
+
+  def self.transform_to_square_num(y, x)
+    3 * y + x + 1
   end
 
-  def index_transform_y(square_num)
-    index = index_transform(square_num)
+  def self.transform_y_index(square_num)
+    index = transform_to_index(square_num)
     index/3
   end
 
-  def index_transform_x(square_num)
-    index = index_transform(square_num)
+  def self.transform_x_index(square_num)
+    index = transform_to_index(square_num)
     index%3
+  end
+
+  def self.transform_to_index(square_num)
+    square_num-1
   end
 
 end
@@ -128,7 +134,7 @@ class ComputerPlayer
   def self.evaluate_move(board)
     sleep 2 # Pauses before evaluating!
     # Some solving methods in here...
-    return board.square_num(y, x)
+    return BoardMath.square_num(y, x)
   end
 
 end
@@ -162,7 +168,7 @@ class Display
         if square.value
           print square.value
         else
-          print " "
+          print "#{BoardMath.square_num(y,x)}".thin
         end
         print " "
         print "|" if x < 2
