@@ -58,27 +58,36 @@ describe Board do
     end
   end
 
-  describe "#game_over?" do
+  describe "#game_won?" do
     it "should return false for a new board" do
-      expect(board.game_over?).to be false
+      expect(board.game_won?).to be false
     end
     it "should return true for the same 3 values in a row" do
       player = [:x,:o].sample
       row_values = [[1,2,3],[4,5,6],[7,8,9]].sample
       row_values.each {|square_num| board.make_move(player, square_num)}
-      expect(board.game_over?).to be true
+      expect(board.game_won?).to be true
     end
     it "should return true for the same 3 values in a column" do
       player = [:x,:o].sample
       column_values = [[1,4,7],[2,5,8],[3,6,9]].sample
       column_values.each {|square_num| board.make_move(player, square_num)}
-      expect(board.game_over?).to be true
+      expect(board.game_won?).to be true
     end
     it "should return true for the same 3 values diagonally" do
       player = [:x,:o].sample
       diagonal_values = [[1,5,9],[3,5,7]].sample
       diagonal_values.each {|square_num| board.make_move(player, square_num)}
-      expect(board.game_over?).to be true
+      expect(board.game_won?).to be true
+    end
+  end
+
+  pending "#moves_remaining?" do
+    it "should return true for 8 or fewer squares filled" do
+    
+    end
+    it "should return false for 9 squares filled" do
+      
     end
   end
 

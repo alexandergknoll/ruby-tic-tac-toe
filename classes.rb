@@ -7,24 +7,24 @@ class Square
     @value = nil
   end
 
-  def make_move(player)
-    @value = player
+  def make_move(player_symbol)
+    @value = player_symbol
   end
 
 end
 
 class Board
-  attr_reader :squares, :winner
+  attr_accessor :squares, :winner
 
   def initialize
     @squares = Array.new(3) {Array.new(3) {Square.new}}
     @winner = nil
   end
 
-  def make_move(player, square_num)
+  def make_move(player_symbol, square_num)
     y = BoardMath.transform_y_index(square_num)
     x = BoardMath.transform_x_index(square_num)
-    squares[y][x].make_move(player)
+    squares[y][x].make_move(player_symbol)
   end
 
   def valid_move?(square_num)
@@ -38,20 +38,40 @@ class Board
   end
 
   def game_over?
-    if row_win? || column_win? || diagonal_win?
+    if game_won? || !moves_remaining?
       return true
     else
       return false
     end
   end
 
+  def game_won?
+    row_win?
+    column_win?
+    diagonal_win?
+    if winner
+      return true
+    else
+      return false
+    end
+  end
+
+  def moves_remaining?
+    squares.each do |row|
+      row.each do |square|
+        return true unless square.value
+      end
+    end
+    return false
+  end
+
   private
 
   def row_win?
-    for player in [:x, :o]
+    for player_symbol in [:x, :o]
       squares.each do |row|
-        if row.count {|square| square.value == player} == 3
-          @winner = player
+        if row.count {|square| square.value == player_symbol} == 3
+          @winner = player_symbol
           return true
         end
       end
@@ -60,10 +80,10 @@ class Board
   end
 
   def column_win?
-    for player in [:x, :y]
+    for player_symbol in [:x, :y]
       squares.transpose.each do |column|
-        if column.count {|square| square.value == player} == 3
-          @winner = player
+        if column.count {|square| square.value == player_symbol} == 3
+          @winner = player_symbol
           return true
         end
       end
@@ -80,12 +100,12 @@ class Board
   end
 
   def diagonal_win_1?
-    for player in [:x, :o]
+    for player_symbol in [:x, :o]
       diagonals = squares.map.with_index do |row, y|
         row[y]
       end
-      if diagonals.count {|square| square.value == player} == 3
-          @winner = player
+      if diagonals.count {|square| square.value == player_symbol} == 3
+          @winner = player_symbol
           return true
       end
     end
@@ -93,12 +113,12 @@ class Board
   end
 
   def diagonal_win_2?
-    for player in [:x, :o]
+    for player_symbol in [:x, :o]
       diagonals = squares.map.with_index do |row, y|
         row[2-y]
       end
-      if diagonals.count {|square| square.value == player} == 3
-          @winner = player
+      if diagonals.count {|square| square.value == player_symbol} == 3
+          @winner = player_symbol
           return true
       end
     end
@@ -110,7 +130,7 @@ end
 class BoardMath
 
   def self.transform_to_square_num(y, x)
-    3 * y + x + 1
+    3*y+x+1
   end
 
   def self.transform_y_index(square_num)
@@ -129,51 +149,68 @@ class BoardMath
 
 end
 
-class ComputerPlayer
-
-  def self.evaluate_move(board)
-    sleep 2 # Pauses before evaluating!
-    # Some solving methods in here...
-    return BoardMath.square_num(y, x)
-  end
-
-end
-
 class Display
 
-  def self.start_game(board)
+  def self.turn(player_symbol, player_type, board)
     board(board)
-    puts "Welcome!"
+    puts "It's #{player_symbol}'s turn!"
+    prompt(player_type)
   end
 
-  def self.turn(player, board)
-    board(board)
-    puts "It's #{player}'s turn!"
-    print "square> "
+  def self.prompt(player_type)
+    print "Square #> " if player_type == :human
+    print "Evaluating..." if player_type == :computer
   end
 
   def self.end_game(board)
     board(board)
-    puts "The winner is #{board.winner}!"
+    if board.winner
+      puts "The winner is #{board.winner}!"
+    else
+      puts "It's a draw!"
+    end
   end
 
   private
 
   def self.board(board)
     reset_screen!
+    puts
     board.squares.each_with_index do |row, y|
-      puts "---+---+---" if y != 0
+      if y > 0
+        indent
+        print_divider
+      end      
+      indent
       row.each_with_index do |square, x|
-        print " "
-        if square.value
-          print square.value
-        else
-          print "#{BoardMath.square_num(y,x)}".thin
-        end
-        print " "
-        print "|" if x < 2
+        indent
+        print_square(y, x, square)
+        indent
+        print_separator if x < 2
         puts if x%3 == 2
       end
+    end
+    puts
+  end
+
+  def self.print_divider
+    puts "-–-|-–-|-–-".bold
+  end
+
+  def self.print_separator
+    print "|".bold 
+  end
+
+  def self.indent
+    print " "
+  end
+
+  def self.print_square(y, x, square)
+    if square.value
+      print "#{square.value}".blue.bold if square.value == :x
+      print "#{square.value}".red.bold if square.value == :o
+    else
+      print "#{BoardMath.transform_to_square_num(y,x)}".thin
     end
   end
 
