@@ -39,9 +39,9 @@ class Board
 
   def game_over?
     if game_won? || !moves_remaining?
-      return true
+      true
     else
-      return false
+      false
     end
   end
 
@@ -50,9 +50,9 @@ class Board
     column_win?
     diagonal_win?
     if winner
-      return true
+      true
     else
-      return false
+      false
     end
   end
 
@@ -62,7 +62,7 @@ class Board
         return true unless square.value
       end
     end
-    return false
+    false
   end
 
   private
@@ -76,7 +76,7 @@ class Board
         end
       end
     end
-    return false
+    false
   end
 
   def column_win?
@@ -88,44 +88,142 @@ class Board
         end
       end
     end
-    return false
+    false
   end
 
   def diagonal_win?
-    if diagonal_win_1? || diagonal_win_2?
-      return true
-    else
-      return false
-    end
-  end
-
-  def diagonal_win_1?
     for player_symbol in [:x, :o]
-      diagonals = squares.map.with_index do |row, y|
-        row[y]
-      end
-      if diagonals.count {|square| square.value == player_symbol} == 3
+      diagonals.each do |diagonal|
+        if diagonal.count {|square| square.value == player_symbol} == 3
           @winner = player_symbol
           return true
+        end
       end
     end
-    return false
+    false
   end
 
-  def diagonal_win_2?
-    for player_symbol in [:x, :o]
-      diagonals = squares.map.with_index do |row, y|
-        row[2-y]
-      end
-      if diagonals.count {|square| square.value == player_symbol} == 3
-          @winner = player_symbol
-          return true
-      end
-    end
-    return false
+  def diagonals
+    diagonal_1 = squares.map.with_index {|row, y| row[y]}
+    diagonal_2 = squares.map.with_index {|row, y| row[2-y]}
+    [diagonal_1, diagonal_2]
   end
 
 end
+
+class Player
+  attr_reader :type, :symbol, :opponent_symbol
+
+  def initialize(options = {})
+    @type = options[:type]
+    @symbol = options[:symbol]
+    @opponent_symbol = :x if symbol == :o
+    @opponent_symbol = :o if symbol == :x
+  end
+
+end
+
+class HumanPlayer < Player
+
+  def initialize(options = {})
+    options[:type] = :human
+    super
+  end
+
+  def turn(board)
+    input = nil
+    until board.valid_move?(input.to_i)
+      Display.turn(symbol, type, board)
+      input = $stdin.gets.chomp
+      if input == "surrender"
+        board.winner = opponent_symbol
+        return
+      end
+    end
+    board.make_move(symbol, input.to_i)
+  end
+
+end
+
+# class ComputerPlayer < Player
+
+#   def initialize(options = {})
+#     options[:type] = :computer
+#     super
+#   end
+
+#   def turn(board)
+#     sleep 2
+#     if win_opportunity(symbol, board)
+#       square_num = win_opportunity(board)
+#       board.make_move(symbol, square_num)
+#     elsif win_opportunity(board)
+#       square_num = opponent_win_opportunity(board)
+#       board.make_move(symbol, square_num)
+#     elsif fork_opportunity(board)
+#       square_num = fork_opportunity(board)
+#       board.make_move(symbol, square_num)
+#     elsif opponent_fork_opportunity(board)
+#       square_num = opponent_fork_opportunity(board)
+#       board.make_move(symbol, square_num)
+#     elsif center_opportunity(board)
+#       square_num = center_opportunity(board)
+#       board.make_move(symbol, square_num)
+#     elsif opposite_opponent_corner_opportunity(board)
+#       square_num = opposite_opponent_corner_opportunity(board)
+#     elsif corner_opportunity(board)
+#       square_num = corner_opportunity(board)
+#       board.make_move(symbol, square_num)
+#     else
+#       square_num = middle_side_opportunity(board)
+#       board.make_move(symbol, type, square_num)
+#     end
+#   end
+
+#   def win_opportunity(board)
+#     return row_win_opportunity(board) if row_win_opportunity(board)
+#     return column_win_opportunity(board) if column_win_opportunity(board)
+#     return diagonal_win_opportunity(board) if diagonal_win_opportunity(board)
+#     false
+#   end
+
+#   def opponent_win_opportunity(board)
+
+#     return false
+#   end
+
+#   def fork_opportunity(board)
+
+#     return false
+#   end
+
+#   def opponent_fork_opportunity(board)
+
+#     return false
+#   end
+
+#   def center_opportunity(board)
+
+#     return false
+#   end
+
+#   def opposite_opponent_corner_opportunity(board)
+
+#     return false
+#   end
+
+#   def corner_opportunity(board)
+
+#     return false
+#   end
+
+#   def middle_side_opportunity(board)
+
+#     return false
+#   end
+
+# end
+
 
 class BoardMath
 
@@ -207,10 +305,10 @@ class Display
 
   def self.print_square(y, x, square)
     if square.value
-      print "#{square.value}".blue.bold if square.value == :x
+      print "#{square.value}".cyan.bold if square.value == :x
       print "#{square.value}".red.bold if square.value == :o
     else
-      print "#{BoardMath.transform_to_square_num(y,x)}".thin
+      print "#{BoardMath.transform_to_square_num(y,x)}".grey.thin
     end
   end
 
