@@ -82,15 +82,6 @@ describe Board do
     end
   end
 
-  pending "#moves_remaining?" do
-    it "should return true for 8 or fewer squares filled" do
-    
-    end
-    it "should return false for 9 squares filled" do
-      
-    end
-  end
-
 end
 
 describe "BoardMath" do
