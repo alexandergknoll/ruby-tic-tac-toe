@@ -84,7 +84,7 @@ class Board
   end
 
   def column_win?
-    for player_symbol in [:x, :y]
+    for player_symbol in [:x, :o]
       squares.transpose.each do |column|
         if column.count {|square| square.value == player_symbol} == 3
           @winner = player_symbol
@@ -312,7 +312,7 @@ class Display
       if y > 0
         indent
         print_divider
-      end      
+      end
       indent
       row.each_with_index do |square, x|
         indent
@@ -330,7 +330,7 @@ class Display
   end
 
   def self.print_separator
-    print "|".bold 
+    print "|".bold
   end
 
   def self.indent

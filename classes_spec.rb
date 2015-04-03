@@ -15,7 +15,7 @@ describe Square do
       expect(square.value).to be :x
     end
   end
-  
+
 end
 
 describe Board do
